@@ -186,6 +186,7 @@ class Node(object):
         self.context = context # for django only
         # copy the variable scope
         self.variables = parent.variables
+
         
     def soft_raise(self, errmsg):
         soft_raise(errmsg)
@@ -216,7 +217,13 @@ class Node(object):
         """
         Pulls all text nodes and returns the parent
         """
-        self.parent.nodes.append(TextNode(self.fullcontent[self.start:end]))
+        ###
+        # Adding this try, except allows for errors to be returned to form -nh
+        ####
+        try:
+            self.parent.nodes.append(TextNode(self.fullcontent[self.start:end]))
+        except:
+            pass
         return self.parent
     
     def close(self, end):
@@ -269,7 +276,7 @@ class TextNode(Node):
         self.parent = parent
         self.raw_content = text
         self.nodes = []
-        
+
     def append(self, text):
         raise TypeError, "TextNode does not support appending"
     
@@ -349,7 +356,7 @@ class ArgumentTagNode(TagNode):
         TagNode.__init__(self, parent, match, content, context)
         arg = match.group('argument')
         self.argument = self.variables.lazy_resolve(arg.strip('"') if arg else '')
-        
+ 
     def __str__(self):
         return '%s (%s)' % (self.__class__.__name__, self.argument)
 
@@ -647,7 +654,7 @@ class Library(object):
                     try:
                         currentnode = currentnode.pull(end)
                     except ParserError:
-                        sem.soft_raise("BBCode could not be parsed. There are probably unclosed or uneven tags!")
+                        sem.soft_raise("Error: BBCode could not be parsed. There are probably unclosed or uneven tags!")
                         raise ParserError, "Failed to find matching opening tag for closing tag '%s' in line %s."  % (get_tag_name(tagklass), lineno)
                 # close the node
                 currentnode = currentnode.close(end)
@@ -705,7 +712,7 @@ def get_default_namespaces():
         return settings.BBCODE_DEFAULT_NAMESPACES
     return ['__all__']
     
-def parse(content, namespaces=None, strict=True, auto_discover=False,
+def parse(content, namespaces=None, strict=False, auto_discover=False,
           context=None):
     """
     Parse a content with the BBCodes
@@ -726,6 +733,9 @@ def parse(content, namespaces=None, strict=True, auto_discover=False,
             return convert_linefeeds(content), sem.pull()
     # parse BB Codes
     content = head.parse()
+    # fix urls
+    from rhizomedotorg.utils.helpers import rhizome_urlize
+    content = rhizome_urlize(content)
     # Replace linefeeds
     content = convert_linefeeds(content)
     return content, sem.pull()
