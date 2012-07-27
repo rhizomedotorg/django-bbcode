@@ -1,6 +1,6 @@
 from django import template
 from django.utils.safestring import mark_safe
-from django.template.defaultfilters import striptags, force_escape
+from rhizomedotorg.utils.helpers import strip_bbcode 
 
 bbmodule = __import__('bbcode',level=0)
 
@@ -38,18 +38,17 @@ class BBCodeNode(template.Node):
                 namespaces = namespaces.union(ns)
             else:
                 namespaces.add(ns)
-        parsed, errors = bbmodule.parse(content, namespaces, False, True, context)
-        if self.varname:
-            context[self.varname] = mark_safe(parsed)
-            return ''
-        else:
-            return mark_safe(parsed)
-
-@register.filter(name='bbcode')
-def bbcode_filter(content):
-    parsed, errors = bbmodule.parse(content, 
-            strict=True, auto_discover=True)
-    return mark_safe(parsed)
+        
+        try:
+            parsed, errors = bbmodule.parse(content, namespaces, False, True, context)
+            
+            if self.varname:
+                context[self.varname] = mark_safe(parsed)
+                return ''
+            else:
+                return mark_safe(parsed)
+        except:
+            return strip_bbcode(content)
 
 @register.tag
 def bbcode(parser, token):
