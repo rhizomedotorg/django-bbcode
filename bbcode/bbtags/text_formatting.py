@@ -166,14 +166,14 @@ class Size(ArgumentTagNode):
     
     Allowed values for [i]size[/i]: tiny, small, normal, big, huge
     """
-    _allowed = ('tiny','small','normal','big','huge')
+    _allowed = ('tiny','small','normal','big','huge','xx-small','x-small','xx-large','x-large','large','medium',)
     open_pattern = re.compile(patterns.single_argument % 'size')
     close_pattern = re.compile(patterns.closing % 'size')
     
     def parse(self):
         if not self.argument:
             return self.parse_inner()
-        arg = self.argument.lower()
+        arg = self.argument.lower().replace(" ","")
         if not arg in self._allowed:
             soft_raise("Size '%s' not allowed." % arg)
             return self.parse_inner()
@@ -391,7 +391,7 @@ class Quote(TagNode):
     close_pattern = re.compile(patterns.closing % 'quote')
     
     def parse(self):
-        return '<blockquote>%s</blockquote>' % self.parse_inner()
+        return '<div class="quote">%s</div>' % self.parse_inner()
 
 
 class Text(ArgumentTagNode):
