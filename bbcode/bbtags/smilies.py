@@ -1,13 +1,12 @@
 from bbcode import *
-from bbcode import settings
+from rhizomedotorg.settings import MEDIA_URL
 import re
 
 class Smilies(SelfClosingTagNode):
     open_pattern = re.compile(':(?P<name>[a-zA-Z-]+):')
     def parse(self):
         name = self.match.groupdict()['name']
-        return '<img src="%s%s.gif" alt="%s" />' % (
-                settings.SMILEY_MEDIA_URL, name, name)
+        return '<img src="%smedia/smilies/%s.gif" alt="%s" />' % (MEDIA_URL, name, name)
         
 
 class AlternativeSmilie(SelfClosingTagNode):
@@ -18,8 +17,7 @@ class AlternativeSmilie(SelfClosingTagNode):
         
     def parse(self):
         alias = self.match.group()
-        return '<img src="%s%s.gif" alt="%s" />' % (
-                settings.SMILEY_MEDIA_URL, self.alias, alias)
+        return '<img src="%smedia/smilies/%s.gif" alt="%s" />' % (MEDIA_URL,self.alias, alias)
     
     
 class LOL(AlternativeSmilie):
@@ -64,14 +62,14 @@ class Neutral(AlternativeSmilie):
     open_pattern = re.compile('(:-?\|)')
 
 
-register(Smilies)
-register(LOL)
-register(Smilie)
-register(Wink)
-register(Razz)
-register(Eek)
-register(Sad)
-register(Crying)
-register(Yell)
-register(Grin)
-register(Neutral)
+# register(Smilies)
+# register(LOL)
+# register(Smilie)
+# register(Wink)
+# register(Razz)
+# register(Eek)
+# register(Sad)
+# register(Crying)
+# register(Yell)
+# register(Grin)
+# register(Neutral)
